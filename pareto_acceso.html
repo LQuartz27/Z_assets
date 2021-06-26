@@ -1,0 +1,112 @@
+<!-- Styles -->
+<style>
+    #chartdiv {
+      width: 100%;
+      height: 100%;
+    }
+    </style>
+    
+    <!-- Resources -->
+    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+    
+    <!-- Chart code -->
+    <script>
+    am4core.ready(function() {
+    
+    // Themes begin
+    am4core.useTheme(am4themes_animated);
+    // Themes end
+    
+    // Create chart instance
+    var chart = am4core.create("chartdiv", am4charts.XYChart);
+    chart.scrollbarX = new am4core.Scrollbar();
+    
+    // Add data
+    chart.data =[{"values":"cau.rb jambalo","count":137},{"values":"bsc-407157,bssfunction=bsc-407157,btssitemgr=bcf-330,gsmcell=bts","count":83},{"values":"rnc-2703\/wbts-1228,nodebfunction=rnc-2703\/wbts-1228","count":75},{"values":"bca.los pinos-3_p","count":73},{"values":"bca.los pinos-3_q","count":73},{"values":"bca.los pinos-3_o","count":71},{"values":"bca.los pinos-3_j","count":68},{"values":"bca.los pinos-3_i","count":66},{"values":"bca.los pinos-3_k","count":63},{"values":"bol.tiquisio_t1","count":51},{"values":"bsc-407154,bssfunction=bsc-407154,btssitemgr=bcf-216,gsmcell=bts","count":47},{"values":"rnc-3008\/wbts-5973,nodebfunction=rnc-3008\/wbts-5973","count":47},{"values":"bca.los pinos-3_m2","count":42},{"values":"bca.los pinos-3_m3","count":42},{"values":"bca.los pinos-3_m1","count":40},{"values":"bsc-397079,bssfunction=bsc-397079,btssitemgr=bcf-504,gsmcell=bts","count":40},{"values":"bsc-407154,bssfunction=bsc-407154,btssitemgr=bcf-372,gsmcell=bts","count":36},{"values":"mrbts-7635","count":36},{"values":"bsc-410758,bssfunction=bsc-410758,btssitemgr=bcf-266,gsmcell=bts","count":30},{"values":"tol.gaitania","count":30},{"values":"bsc-404212,bssfunction=bsc-404212,btssitemgr=bcf-653","count":30},{"values":"rnc-2351\/wbts-2036,nodebfunction=rnc-2351\/wbts-2036","count":29},{"values":"bsc-407154,bssfunction=bsc-407154,btssitemgr=bcf-438,gsmcell=bts","count":27}]
+    prepareParetoData();
+    
+    function prepareParetoData(){
+        var total = 0;
+    
+        for(var i = 0; i < chart.data.length; i++){
+            var value = chart.data[i].count;
+            total += value;
+        }
+    
+        var sum = 0;
+        for(var i = 0; i < chart.data.length; i++){
+            var value = chart.data[i].count;
+            sum += value;   
+            chart.data[i].pareto = sum / total * 100;
+        }    
+    }
+    
+    // Create axes
+    var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+    categoryAxis.dataFields.category = "values";
+    categoryAxis.renderer.grid.template.location = 0;
+    categoryAxis.renderer.minGridDistance = 60;
+    categoryAxis.tooltip.disabled = true;
+    categoryAxis.renderer.labels.template.rotation = 270;
+    
+    var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+    valueAxis.renderer.minWidth = 50;
+    valueAxis.min = 0;
+    valueAxis.cursorTooltipEnabled = false;
+    
+    // Create series
+    var series = chart.series.push(new am4charts.ColumnSeries());
+    series.sequencedInterpolation = true;
+    series.dataFields.valueY = "count";
+    series.dataFields.categoryX = "values";
+    series.tooltipText = "[{categoryX}: bold]{valueY}[/]";
+    series.columns.template.strokeWidth = 0;
+    
+    series.tooltip.pointerOrientation = "vertical";
+    
+    series.columns.template.column.cornerRadiusTopLeft = 10;
+    series.columns.template.column.cornerRadiusTopRight = 10;
+    series.columns.template.column.fillOpacity = 0.8;
+    
+    // on hover, make corner radiuses bigger
+    var hoverState = series.columns.template.column.states.create("hover");
+    hoverState.properties.cornerRadiusTopLeft = 0;
+    hoverState.properties.cornerRadiusTopRight = 0;
+    hoverState.properties.fillOpacity = 1;
+    
+    series.columns.template.adapter.add("fill", function(fill, target) {
+      return chart.colors.getIndex(target.dataItem.index);
+    })
+    
+    
+    var paretoValueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+    paretoValueAxis.renderer.opposite = true;
+    paretoValueAxis.min = 0;
+    paretoValueAxis.max = 100;
+    paretoValueAxis.strictMinMax = true;
+    paretoValueAxis.renderer.grid.template.disabled = true;
+    paretoValueAxis.numberFormatter = new am4core.NumberFormatter();
+    paretoValueAxis.numberFormatter.numberFormat = "#'%'"
+    paretoValueAxis.cursorTooltipEnabled = false;
+    
+    var paretoSeries = chart.series.push(new am4charts.LineSeries())
+    paretoSeries.dataFields.valueY = "pareto";
+    paretoSeries.dataFields.categoryX = "values";
+    paretoSeries.yAxis = paretoValueAxis;
+    paretoSeries.tooltipText = "pareto: {valueY.formatNumber('#.0')}%[/]";
+    paretoSeries.bullets.push(new am4charts.CircleBullet());
+    paretoSeries.strokeWidth = 2;
+    paretoSeries.stroke = new am4core.InterfaceColorSet().getFor("alternativeBackground");
+    paretoSeries.strokeOpacity = 0.5;
+    
+    // Cursor
+    chart.cursor = new am4charts.XYCursor();
+    chart.cursor.behavior = "panX";
+    
+    }); // end am4core.ready()
+    </script>
+
+    <!-- HTML -->
+    <div id="chartdiv"></div>
